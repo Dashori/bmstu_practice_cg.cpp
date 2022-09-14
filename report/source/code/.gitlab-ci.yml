@@ -1,0 +1,154 @@
+image: darkmattercoder/qt-build:latest
+
+stages: 
+  - build_debug
+  - testing
+  - build_release
+  - generate_image
+  - generate_image_film
+  - create_film
+  - research
+
+debug-build:
+  stage: build_debug
+  script:
+    - cd chicago_develop
+    - qmake -project QT+=widgets QT+=testlib chicago_develop.pro
+    - qmake
+    - make
+  artifacts:
+    paths:
+      - chicago_develop/chicago_develop
+    expire_in: 1 day
+
+unit-test:
+  stage: testing
+  script: 
+    - export QT_QPA_PLATFORM=offscreen
+    - cd chicago_develop
+    - ./chicago_develop -test
+  needs:
+    - debug-build
+
+release-build:
+  stage: build_release
+  script:
+    - cd chicago_develop
+    - qmake -project QT+=widgets QT+=testlib chicago_develop.pro
+    - qmake
+    - make
+  artifacts:
+    paths:
+      - chicago_develop/chicago_develop
+    expire_in: 1 day
+  needs:
+    - unit-test
+
+
+generate-image:
+  stage: generate_image
+  script:
+    - export QT_QPA_PLATFORM=offscreen
+    - cd chicago_develop
+    - ./chicago_develop -scene ./scenes/scene.obj -image deer.png
+  artifacts:
+    paths:
+      - chicago_develop/deer.png
+    expire_in: 7 days
+  needs:
+    - release-build
+
+
+generate-image-film-deer:
+  stage: generate_image_film
+  script:
+    - export QT_QPA_PLATFORM=offscreen
+    - cd chicago_develop
+    - mkdir film
+    - ./chicago_develop -scene ./scenes/deer.obj -film 0
+  artifacts:
+    paths:
+      - chicago_develop/film/film*.png
+    expire_in: 7 days
+  needs:
+    - release-build
+    - generate-image
+
+generate-image-film-catwolf:
+  stage: generate_image_film
+  script:
+    - export QT_QPA_PLATFORM=offscreen
+    - cd chicago_develop
+    - mkdir film
+    - ./chicago_develop -scene ./scenes/catwolf.obj -film 20
+  artifacts:
+    paths:
+      - chicago_develop/film/film*.png
+    expire_in: 7 days
+  needs:
+    - release-build
+    - generate-image
+
+generate-image-film-trees:
+  stage: generate_image_film
+  script:
+    - export QT_QPA_PLATFORM=offscreen
+    - cd chicago_develop
+    - mkdir film
+    - ./chicago_develop -scene ./scenes/trees.obj -film 40
+  artifacts:
+    paths:
+      - chicago_develop/film/film*.png
+    expire_in: 7 days
+  needs:
+    - release-build
+    - generate-image
+
+
+create-film:
+  image:  
+    name: jrottenberg/ffmpeg
+    entrypoint: [""]
+  stage: create_film
+  script:
+    - cd chicago_develop/film 
+    - ffmpeg -r 5 -f image2 -s 1920x1080 -i film%d.png -crf 1 -pix_fmt yuv420p film.mp4
+  artifacts:
+    paths:
+      - chicago_develop/film/film.mp4
+    expire_in: 7 days
+  needs:
+    - release-build
+    - generate-image
+    - generate-image-film-deer
+    - generate-image-film-catwolf
+    - generate-image-film-trees
+    
+research-time:
+  stage: research
+  script:
+    - cd chicago_develop
+    - export QT_QPA_PLATFORM=offscreen
+    - bash research.sh
+  artifacts:
+    paths:
+      - chicago_develop/result.txt
+    expire_in: 1 day
+  needs:
+    - release-build
+
+result-research-graph:
+  stage: research
+  image: python
+  before_script:
+    - pip install matplotlib
+  script:
+    - cd chicago_develop
+    - python3 result_graph.py
+  artifacts:
+    paths:
+      - chicago_develop/result.png
+    expire_in: 1 day
+  needs:
+    - research-time
+
