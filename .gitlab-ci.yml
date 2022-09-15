@@ -80,7 +80,7 @@ generate-image-film-catwolf:
     - export QT_QPA_PLATFORM=offscreen
     - cd chicago_develop
     - mkdir film
-    - ./chicago_develop -scene ./scenes/catwolf.obj -film 20
+    - ./chicago_develop -scene ./scenes/catwolf.obj -film 10
   artifacts:
     paths:
       - chicago_develop/film/film*.png
@@ -95,7 +95,7 @@ generate-image-film-trees:
     - export QT_QPA_PLATFORM=offscreen
     - cd chicago_develop
     - mkdir film
-    - ./chicago_develop -scene ./scenes/trees.obj -film 40
+    - ./chicago_develop -scene ./scenes/trees.obj -film 20
   artifacts:
     paths:
       - chicago_develop/film/film*.png
