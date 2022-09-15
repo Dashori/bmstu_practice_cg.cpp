@@ -1,7 +1,5 @@
 #include "mainwindow.h"
 
-#include <QApplication>
-
 
 int parseArguments(MainWindow &w, int argc, char *argv[]);
 

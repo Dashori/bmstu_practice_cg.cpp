@@ -11,9 +11,9 @@ int Loader::checkFile(std::string &filename)
     file->open(filename);
 
     if (!file)
-        return 1;
+        return EXIT_FAILURE;
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

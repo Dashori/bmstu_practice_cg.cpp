@@ -7,11 +7,10 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <fstream>
 
 #include <QVector3D>
 #include <QColor>
-
-#include <fstream>
 
 #include "triangle.h"
 
